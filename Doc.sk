@@ -1,0 +1,175 @@
+variables:
+	{boost.%player%} = false
+#Doctor DodgeBall
+on projectile hit:
+	projectile is a snowball:
+		drop 1 snowball at location of projectile
+on damage:
+	if projectile is a snowball:
+		set {frozen.%victim%} to true
+		apply slowness 10 to the victim for 1 day
+		apply jump boost -5 to the victim for 1 day
+		cancel event
+on damage:
+	if projectile is a snowball:
+		set {frozen.%victim%} to true
+		apply slowness 10 to the victim for 1 day
+		apply jump boost -5 to the victim for 1 day
+		cancel event
+on damage:
+	attacker is holding a blaze rod named "&bHealer"
+	remove jump boost from the victim
+	remove slowness from the victim
+	set {frozen.%victim%} to false
+	cancel event
+every 2 ticks:
+	execute console command "/pickup"
+command /pickup:
+	trigger:
+		loop all players:
+			while loop-player's inventory contains 3 snowballs:
+				remove 1 snowball from loop-player
+				chance of 25%:
+					drop 1 snowball at location of {snow.1}
+					stop
+				chance of 25%:
+					drop 1 snowball at location of {snow.2}
+					stop
+				chance of 25%:
+					drop 1 snowball at location of {snow.3}
+					stop
+				chance of 25%:
+					drop 1 snowball at location of {snow.4}
+					stop
+				else:
+					drop 1 snowball at location of {snow.1}
+					stop
+command /snow <text>:
+	trigger:
+		if argument 1 is "1":
+			set {snow.1} to location of player
+		if argument 1 is "2":
+			set {snow.2} to location of player
+		if argument 1 is "3":
+			set {snow.3} to location of player
+		if argument 1 is "4":
+			set {snow.4} to location of player
+		if argument 1 is "purple":
+			set {team.purple} to location of player
+		if argument 1 is "gold":
+			set {team.gold} to location of player
+on quit:
+	drop all snowballs at location of player
+every 2 ticks:
+	execute console command "/line"
+command /line:
+	trigger:
+		loop all players:
+			x-coordinate of loop-player is between 505.000000001 and 505.999999999:
+				y-coordinate of loop-player is between 3 and 15:
+					if {team.%loop-player%.purple} is true:
+						teleport loop-player to {team.purple}
+					if {team.%loop-player%.gold} is true:
+						teleport loop-player to {team.gold}
+command /start:
+	trigger:
+		set {game.started} to true
+		drop 1 snowball at location of {snow.1}
+		drop 1 snowball at location of {snow.2}
+		drop 1 snowball at location of {snow.3}
+		drop 1 snowball at location of {snow.4}
+		broadcast "game begun!"
+command /end:
+	trigger:
+		set {game.started} to false
+		broadcast "game ended!"
+command /clear:
+	trigger:
+		loop entities in radius 150 of player:
+			loop-entity is a dropped item:
+				delete loop-entity
+on damage of player:
+	if {game.started} is true:
+		cancel event
+command /purple:
+	trigger:
+		set {team.%player%.purple} to true
+		set {team.%player%.gold} to false
+		message "your now on team purple"
+command /gold:
+	trigger:
+		set {team.%player%.gold} to true
+		set {team.%player%.purple} to false
+		message "your now on team gold"
+on rightclick holding snowball:
+	if {game.started} is true:
+		if {frozen.%player%} is true:
+			cancel event
+on damage:
+	if projectile is a snowball:
+		if {team.%attacker%.purple} is true:
+			if {team.%victim%.purple} is true:
+				stop
+		if {team.%attacker%.gold} is true:
+			if {team.%victim%.gold} is true:
+				stop
+		else:
+			give 20 xp to attacker
+			stop
+on pickup:
+	if {frozen.%player%} is true:
+		cancel event
+on drop:
+	if {frozen.%player%} is true:
+		cancel event
+variables:
+	{sorter} = 0
+on join:
+	if {sorter} is 0:
+		set {team.%player%.purple} to true
+		set {team.%player%.gold} to false
+		set {sorter} to 1
+		wait 2 seconds
+		message "You are on Purple Team"
+		stop
+	if {sorter} is 1:
+		set {team.%player%.gold} to true
+		set {team.%player%.purple} to false
+		set {sorter} to 0
+		wait 2 seconds
+		message "You are on Gold Team"
+		stop
+on join:
+	clear inventory of player
+	give a blaze rod named "&bRifle" to the player
+	give a blaze rod named "&bHealer" to the player
+on rightclick holding a blaze rod:
+	if {frozen.%player%} is false:
+		name of tool is "&brifle"
+		player has 1 snowball
+		make the player shoot a snowball at speed 3
+		remove 1 snowball from the player
+	
+command /teams:
+	trigger:
+		loop all players:
+			if {sorter} is 1:
+				set {team.%loop-player%.gold} to true
+				set {team.%loop-player%.purple} to false
+				teleport loop-player to {team.gold}
+				set {sorter} to 0
+				wait 2 seconds
+				send "You are on Gold Team" to loop-player
+			else:
+				set {team.%loop-player%.purple} to true
+				set {team.%loop-player%.gold} to false
+				teleport loop-player to {team.purple}
+				set {sorter} to 1
+				wait 2 seconds
+				message "You are on Purple Team" to loop-player
+			execute console command "/start"
+		
+	
+	
+	
+		
